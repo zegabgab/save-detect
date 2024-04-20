@@ -9,7 +9,7 @@ void stalk(const char *filename) {
         int stat_error = stat(filename, &statbuf);
        
         if (stat_error) {
-            fprintf(stderr, "Error checking file %s:", filename);
+            fprintf(stderr, "Error checking file %s: ", filename);
             perror("");
         }
         
@@ -21,3 +21,4 @@ void stalk(const char *filename) {
         printf("File last changed at %ld\n", last_time);
     }
 }
+
