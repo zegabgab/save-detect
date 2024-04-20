@@ -1,17 +1,16 @@
 #include <stdio.h>
+#include "stalk.h"
+
+const int FAILURE = 69;
 
 void usage(void) {
     fprintf(stderr, "Usage: save-detect filename\n");
 }
 
-void stalk(char *filename) {
-    printf("Stalking %s\n", filename);
-}
-
 int main(int argc, char **argv) {
-    if (argc < 2 || argc > 2) {
+    if (argc != 2) {
         usage();
-        return 69;
+        return FAILURE;
     }
     stalk(argv[1]);
 }
