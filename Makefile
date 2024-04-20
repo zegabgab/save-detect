@@ -2,8 +2,8 @@ CC = gcc
 SOURCE_DIR = src/
 TARGET = target/
 TARGET_OBJ = target/obj/
-TARGET_BIN = target/obj/
-OBJS = $(wildcard $(SOURCE_DIR
+TARGET_BIN = target/bin/
+OBJS = $(patsubst $(SOURCE_DIR)%.c, $(TARGET_OBJ)%.o, $(wildcard $(SOURCE_DIR)*.c))
 
 all: dirs main
 
@@ -15,8 +15,8 @@ dirs: $(TARGET) $(TARGET_OBJ) $(TARGET_BIN)
 %/:
 	mkdir $@
 
-main: $(wildcard $(SOURCE_DIR)*.c:.c=.o)
-	$(CC) -o $(TARGET_BIN)stalk $(TARGET_OBJ)*.o
+main: $(OBJS)
+	$(CC) -o $(TARGET_BIN)stalk $(wildcard $(TARGET_OBJ)*.o)
 
-%.o: %.c
-	$(CC) -o $(TARGET_OBJ)$@ -c $(SOURCE_DIR)$?
+$(TARGET_OBJ)%.o: $(SOURCE_DIR)%.c
+	$(CC) -o $@ -c $?

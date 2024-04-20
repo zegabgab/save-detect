@@ -14,7 +14,6 @@ void stalk(const char *filename) {
         print_error(filename);
         return;
     }
-    printf("new");
     if (!stat_error) {
         printf("Currently stalking %s\n", filename);
     }
