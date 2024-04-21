@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <time.h>
 
 static void print_error(const char *filename);
+static void print_time(FILE *stream, time_t *time);
 
 void stalk(const char *filename) {
     struct stat statbuf;
@@ -30,12 +32,20 @@ void stalk(const char *filename) {
             continue;
         }
         last_time = new_time;
-        printf("File last changed at %ld\n", last_time);
+        printf("File changed!\nTime: %ld\nFormatted time: ", last_time);
+        print_time(stdout, &statbuf.st_mtim.tv_sec);
     }
 }
 
 static void print_error(const char *filename) {
     fprintf(stderr, "Error checking file %s: ", filename);
     perror("");
+}
+
+static void print_time(FILE *stream, time_t *time) {
+    static const int BUFSIZE = 100;
+    char buf[BUFSIZE];
+    ctime_r(time, buf);
+    fprintf(stream, "%s", buf);
 }
 
