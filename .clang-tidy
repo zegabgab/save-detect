@@ -3,4 +3,5 @@ Checks: >
   portability-*,
   readability-*,
   performance-*,
-  bugprone-*
+  bugprone-*,
+  misc-*
