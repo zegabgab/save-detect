@@ -1,22 +1,22 @@
 CC = gcc
-SOURCE_DIR = src/
+SRC = src/
 TARGET = target/
-TARGET_OBJ = target/obj/
-TARGET_BIN = target/bin/
-OBJS = $(patsubst $(SOURCE_DIR)%.c, $(TARGET_OBJ)%.o, $(wildcard $(SOURCE_DIR)*.c))
+OBJ = target/obj/
+BIN = target/bin/
+OBJS = $(patsubst $(SRC)%.c, $(OBJ)%.o, $(wildcard $(SRC)*.c))
 
 all: dirs main
 
 clean:
 	rm -rf $(TARGET)
 
-dirs: $(TARGET) $(TARGET_OBJ) $(TARGET_BIN)
+dirs: $(TARGET) $(OBJ) $(BIN)
 
 %/:
 	mkdir $@
 
 main: $(OBJS)
-	$(CC) -o $(TARGET_BIN)stalk $(wildcard $(TARGET_OBJ)*.o)
+	$(CC) -o $(BIN)stalk $(wildcard $(OBJ)*.o)
 
-$(TARGET_OBJ)%.o: $(SOURCE_DIR)%.c
+$(OBJ)%.o: $(SRC)%.c
 	$(CC) -o $@ -c $?

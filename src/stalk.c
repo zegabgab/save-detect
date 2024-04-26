@@ -17,9 +17,6 @@ void stalk(const char *filename) {
     }
 
     long last_time = statbuf.st_mtim.tv_nsec;
-    if (!stat_error) {
-        printf("Currently stalking %s\n", filename);
-    }
 
     while (1) {
         stat_error = stat(filename, &statbuf);

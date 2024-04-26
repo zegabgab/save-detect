@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "stalk.h"
+#include "startmessage.h"
 
 const int FAILURE = 69;
 
@@ -12,6 +13,7 @@ int main(int argc, char **argv) {
         usage();
         return FAILURE;
     }
+    startmessage(argv[1]);
     stalk(argv[1]);
 }
 
