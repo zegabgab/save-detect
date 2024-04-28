@@ -4,8 +4,8 @@
 
 const int FAILURE = 69;
 
-void usage(void) {
-    fprintf(stderr, "Usage: save-detect filename\n");
+int usage(void) {
+    return fprintf(stderr, "Usage: save-detect filename\n");
 }
 
 int main(int argc, char **argv) {
@@ -13,7 +13,9 @@ int main(int argc, char **argv) {
         usage();
         return FAILURE;
     }
-    startmessage(argv[1]);
-    stalk(argv[1]);
+
+    const char *const file = argv[1];
+    startmessage(file);
+    stalk(file);
 }
 

@@ -7,6 +7,7 @@ OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(wildcard $(SRC)/*.c))
 
 all: dirs main
 
+.PHONY: clean
 clean:
 	rm -rf $(TARGET)
 
