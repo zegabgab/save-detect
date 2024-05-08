@@ -1,27 +1,38 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/file.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <time.h>
 
 static void print_error(const char *filename);
 static int print_time(FILE *stream, time_t *time);
 
-void stalk(const char *filename) {
+int stalk(const char *filename) {
     struct stat statbuf;
+    int filedesc = open(filename, O_RDONLY);
+    if (filedesc < 0) {
+        return 1;
+    }
+    if (flock(filedesc, LOCK_SH)) {
+        close(filedesc);
+        return 2;
+    }
 
-    int stat_error = stat(filename, &statbuf);
+    int stat_error = fstat(filedesc, &statbuf);
 
     if (stat_error) {
         print_error(filename);
-        return;
+        return 1;
     }
 
     long last_time = statbuf.st_mtim.tv_nsec;
 
     while (1) {
-        stat_error = stat(filename, &statbuf);
+        stat_error = fstat(filedesc, &statbuf);
 
-        if (stat_error && errno != ENOENT) {
+        if (stat_error) {
             print_error(filename);
         }
         

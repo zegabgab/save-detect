@@ -4,23 +4,22 @@ SRC = src
 TARGET = target
 OBJ = target/obj
 BIN = target/bin
-OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(wildcard $(SRC)/*.c))
+MAIN = stalk
+SRCS = $(shell find $(SRC)/ -type f -name '*.c')
+OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
-all: dirs main
+all: main
 
 .PHONY: clean
 clean:
 	rm -rf $(TARGET)
 
-dirs: $(TARGET)/ $(OBJ)/ $(BIN)/
+main: $(BIN)/$(MAIN)
 
-%/:
-	mkdir $@
-
-main: $(BIN)/stalk
-
-$(BIN)/stalk: $(OBJS)
+$(BIN)/$(MAIN): $(OBJS)
+	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $(OBJ)/*.o
 
 $(OBJ)/%.o: $(SRC)/%.c
+	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $?

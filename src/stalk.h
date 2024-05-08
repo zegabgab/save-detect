@@ -1,1 +1,1 @@
-void stalk(const char *filename);
+int stalk(const char *filename);
