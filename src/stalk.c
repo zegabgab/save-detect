@@ -15,14 +15,30 @@ int stalk(const char *filename) {
     }
     int watch = inotify_add_watch(notify, filename, IN_MODIFY);
     struct inotify_event mod_event;
-    ssize_t bytes = read(notify, &mod_event, sizeof mod_event);
+
+    ssize_t bytes = 0;
+    while (bytes < sizeof mod_event) {
+        ssize_t new_bytes = read(notify, (char*) &mod_event + bytes, sizeof mod_event - bytes);
+        if (new_bytes == -1) {
+            inotify_rm_watch(notify, watch);
+            if (close(notify) != 0) {
+                perror("close inotify instance");
+            }
+            return 1;
+        }
+        bytes += new_bytes;
+    }
+
     time_t now;
     time(&now);
     printf("[");
     print_time(stdout, &now);
     printf("] File changed!\n");
     inotify_rm_watch(notify, watch);
-    return close(notify);
+    if (close(notify) != 0) {
+        perror("close inotify instance");
+    }
+    return 0;
 }
 
 static void print_error(const char *filename) {
