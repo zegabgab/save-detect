@@ -34,7 +34,10 @@ int main(int argc, char **argv) {
     } else {
         startmessage(file);
     }
-    stalk(file);
+    if (stalk(file)) {
+        perror("stalk");
+        return FAILURE;
+    }
 }
 
 static bool parse_args(int argc, char **argv, char **file, bool *fun) {
