@@ -8,5 +8,10 @@ int startmessage(const char *fname) {
     char pathbuf[BUFSIZE];
     char normpathbuf[BUFSIZE];
     snprintf(pathbuf, BUFSIZE, "%s/%s", getcwd(wdirbuf, BUFSIZE), fname);
-    return printf("Stalking %s\n", realpath(pathbuf, normpathbuf));
+    char *resolved_path = realpath(pathbuf, normpathbuf);
+    if (resolved_path == NULL) {
+        perror("Error checking file");
+        return -1;
+    }
+    return printf("Stalking %s\n", resolved_path);
 }

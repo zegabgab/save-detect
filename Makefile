@@ -17,9 +17,9 @@ clean:
 main: $(BIN)/$(MAIN)
 
 $(BIN)/$(MAIN): $(OBJS)
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $(OBJ)/*.o
 
 $(OBJ)/%.o: $(SRC)/%.c
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $?

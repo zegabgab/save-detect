@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include "checkfile.h"
 #include "stalk.h"
 #include "startmessage.h"
 
@@ -22,6 +23,10 @@ int main(int argc, char **argv) {
 
     if (parse_args(argc, argv, &file, &fun)) {
         usage();
+        return FAILURE;
+    }
+    if (confirmaccessible(file)) {
+        perror(file);
         return FAILURE;
     }
     if (fun) {
