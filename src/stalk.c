@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <time.h>
 
-static void print_error(const char *filename);
 static int print_time(FILE *stream, time_t *time);
 
 int stalk(const char *filename) {
@@ -39,11 +38,6 @@ int stalk(const char *filename) {
         perror("close inotify instance");
     }
     return 0;
-}
-
-static void print_error(const char *filename) {
-    fprintf(stderr, "Error checking file %s: ", filename);
-    perror("");
 }
 
 static int print_time(FILE *stream, time_t *timep) {
