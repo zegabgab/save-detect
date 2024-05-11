@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
+#include "wait/waitforchange.h"
 
 static int print_time(FILE *stream, time_t *time);
 
