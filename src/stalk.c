@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <sys/inotify.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -9,34 +8,26 @@
 static int print_time(FILE *stream, time_t *time);
 
 int stalk(const char *filename) {
-    int notify = inotify_init();
-    if (notify == -1) {
+    struct waiter waiter;
+    if (init_waiter(&waiter)) {
+        perror("init_waiter");
         return 1;
     }
-    int watch = inotify_add_watch(notify, filename, IN_MODIFY);
-    struct inotify_event mod_event;
-
-    ssize_t bytes = 0;
-    while (bytes < sizeof mod_event) {
-        ssize_t new_bytes = read(notify, (char*) &mod_event + bytes, sizeof mod_event - bytes);
-        if (new_bytes == -1) {
-            inotify_rm_watch(notify, watch);
-            if (close(notify) != 0) {
-                perror("close inotify instance");
-            }
-            return 1;
-        }
-        bytes += new_bytes;
+    if (waiter_add_watch(&waiter, filename)) {
+        perror("waiter_add_watch");
     }
-
+    if (wait_for_event(&waiter)) {
+        perror("wait_for_event");
+        return 1;
+    }
     time_t now;
     time(&now);
     printf("[");
     print_time(stdout, &now);
     printf("] File changed!\n");
-    inotify_rm_watch(notify, watch);
-    if (close(notify) != 0) {
-        perror("close inotify instance");
+    if (cleanup_waiter(&waiter)) {
+        perror("cleanup_waiter");
+        return 1;
     }
     return 0;
 }

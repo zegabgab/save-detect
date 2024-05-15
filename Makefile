@@ -18,7 +18,7 @@ main: $(BIN)/$(MAIN)
 
 $(BIN)/$(MAIN): $(OBJS)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ $(OBJ)/*.o
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
 $(OBJ)/%.o: $(SRC)/%.c
 	@mkdir -p $(@D)
