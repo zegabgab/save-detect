@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <sys/inotify.h>
 #include <unistd.h>
+#include <errno.h>
+#include <limits.h>
 
 int init_waiter(struct waiter *waiter) {
     if (waiter == NULL) {
@@ -16,9 +18,9 @@ int init_waiter(struct waiter *waiter) {
         perror("inotify_init");
         return 1;
     }
-    waiter->watched_files = NULL;
-    waiter->watched_num = 0;
-    waiter->watched_cap = 0;
+    waiter->watches = NULL;
+    waiter->num = 0;
+    waiter->cap = 0;
     return 0;
 }
 
@@ -35,36 +37,38 @@ struct waiter *new_waiter() {
     return result;
 }
 
-static int double_capacity(int **array, size_t *cap) {
-    size_t new_cap = (*cap + 1) << 1;
-    int *new_array = realloc(*array, sizeof **array * new_cap);
+static int double_capacity(struct waiter *waiter) {
+    size_t new_cap = (waiter->cap + 1) << 1;
+    struct watch *new_array = realloc(waiter->watches, sizeof *waiter->watches * new_cap);
     if (new_array == NULL) {
         perror("realloc");
         return 1;
     }
-    *cap = new_cap;
-    *array = new_array;
+    waiter->cap = new_cap;
+    waiter->watches = new_array;
     return 0;
 }
 
-static int add_to_waiter(struct waiter *waiter, int watch) {
-    if (waiter->watched_num == waiter->watched_cap) {
-        int err = double_capacity(&waiter->watched_files, &waiter->watched_cap);
+static int add_to_waiter(struct waiter *waiter, struct watch watch) {
+    if (waiter->num == waiter->cap) {
+        int err = double_capacity(waiter);
         if (err) {
             perror("double_capacity");
             return 1;
         }
     }
-    waiter->watched_files[waiter->watched_num++] = watch;
+    waiter->watches[waiter->num++] = watch;
     return 0;
 }
 
 int waiter_add_watch(struct waiter *waiter, const char *pathname) {
-    int watch = inotify_add_watch(waiter->inotify_instance, pathname, IN_MODIFY);
-    if (watch == -1) {
+    struct watch watch;
+    watch.file = inotify_add_watch(waiter->inotify_instance, pathname, IN_MODIFY);
+    if (watch.file == -1) {
         perror("inotify_add_watch");
         return 1;
     }
+    watch.path = pathname;
     if (add_to_waiter(waiter, watch)) {
         perror("add_to_waiter");
         return 1;
@@ -73,18 +77,28 @@ int waiter_add_watch(struct waiter *waiter, const char *pathname) {
 }
 
 int wait_for_event(struct waiter *waiter) {
-    struct inotify_event event;
+    char buffer[sizeof(struct inotify_event) + NAME_MAX + 1];
     ssize_t bytes = 0;
-    while (bytes < sizeof event) {
+    while (bytes < sizeof(struct inotify_event)) {
         ssize_t new_bytes = 
-            read(waiter->inotify_instance, (char*) &event + bytes, sizeof event - bytes);
-        if (new_bytes == -1) {
+            read(waiter->inotify_instance, buffer + bytes, sizeof(struct inotify_event) - bytes);
+        if (new_bytes == -1 && errno != EINTR) {
             perror("read");
             break;
         }
-        bytes += new_bytes;
+        bytes += new_bytes >= 0 ? new_bytes : 0;
     }
-    return bytes < sizeof event;
+    size_t len = ((struct inotify_event*) buffer)->len + sizeof(struct inotify_event);
+    while (bytes < len) {
+        ssize_t new_bytes = 
+            read(waiter->inotify_instance, buffer + bytes, len - bytes);
+        if (new_bytes == -1 && errno != EINTR) {
+            perror("read");
+            break;
+        }
+        bytes += new_bytes >= 0 ? new_bytes : 0;
+    }
+    return bytes < sizeof(struct inotify_event);
 }
 
 int cleanup_waiter(struct waiter *waiter) {
@@ -93,9 +107,10 @@ int cleanup_waiter(struct waiter *waiter) {
         return 1;
     }
     waiter->inotify_instance = -1;
-    free(waiter->watched_files);
-    waiter->watched_files = NULL;
-    waiter->watched_num = 0;
+    free(waiter->watches);
+    waiter->watches = NULL;
+    waiter->num = 0;
+    waiter->cap = 0;
     return 0;
 }
 
