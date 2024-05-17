@@ -2,9 +2,9 @@ CC = gcc
 CFLAGS = -Wall
 SRC = src
 TARGET = target
-OBJ = target/obj
-BIN = target/bin
-MAIN = stalk
+OBJ = $(TARGET)/obj
+BIN = $(TARGET)/bin
+MAIN = $(TARGET)/stalk
 SRCS = $(shell find $(SRC)/ -type f -name '*.c')
 OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
@@ -14,9 +14,9 @@ all: main
 clean:
 	rm -rf $(TARGET)
 
-main: $(BIN)/$(MAIN)
+main: $(MAIN)
 
-$(BIN)/$(MAIN): $(OBJS)
+$(MAIN): $(OBJS)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
