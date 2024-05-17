@@ -4,7 +4,7 @@ SRC = src
 TARGET = target
 OBJ = $(TARGET)/obj
 BIN = $(TARGET)/bin
-MAIN = $(TARGET)/stalk
+MAIN = $(BIN)/stalk
 SRCS = $(shell find $(SRC)/ -type f -name '*.c')
 OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
